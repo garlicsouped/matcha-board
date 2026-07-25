@@ -527,7 +527,7 @@ function toast(msg,isErr){toastMascot(msg,null,isErr);}
 function toastMascot(msg,img,isErr){const t=document.getElementById("toast");t.className="toast show"+(isErr?" err":"");t.innerHTML=(img?`<img src="${img}">`:"")+`<span>${esc(msg)}</span>`;clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove("show"),2800);}
 
 /* ---- status/poll/init ---- */
-function setStatus(){const pill=document.getElementById("statusPill"),txt=document.getElementById("statusText");if(REMOTE.provider==="local"){pill.className="status local";txt.textContent="Local mode (this browser only)";}else{pill.className="status live";txt.textContent="Passwords are only lightly scrambled, so nobody should reuse a real password.;}}
+function setStatus(){const pill=document.getElementById("statusPill"),txt=document.getElementById("statusText");if(REMOTE.provider==="local"){pill.className="status local";txt.textContent="Local mode (this browser only)";}else{pill.className="status live";txt.textContent="Passwords are only lightly scrambled, so nobody should reuse a real password. · "+REMOTE.provider;}}
 async function poll(){const l=await remoteLoadAll();if(applyState(l)){if(session){const u=users.find(x=>x.uKey===session.uKey);if(u){session.role=u.role;}else{session=null;store.del(SKEY);renderAuth();}}renderAll();}}
 function migrate(arr){return arr.map(m=>({char:"bowl",...m,char:m.char||"bowl"}));}
 async function init(){

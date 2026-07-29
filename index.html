@@ -81,9 +81,22 @@
 
   /* ---------- Main tabs (Leaderboard / To Try / Podium) ---------- */
   .maintabs{display:flex;gap:10px;justify-content:center;margin:0 auto 20px;max-width:660px;}
-  .maintab{flex:1;text-align:center;padding:12px;border-radius:14px;font-weight:800;font-size:1rem;cursor:pointer;background:#fff;border:2px solid var(--mid);color:#5c7a66;box-shadow:var(--shadow-sm);transition:.15s;}
+  .maintab{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px 8px;border-radius:14px;font-weight:800;font-size:.92rem;line-height:1.15;white-space:nowrap;cursor:pointer;background:#fff;border:2px solid var(--mid);color:#5c7a66;box-shadow:var(--shadow-sm);transition:.15s;}
   .maintab:hover{background:var(--light);}
   .maintab.active{background:var(--lc);color:#fff;border-color:var(--lc);box-shadow:0 4px 0 var(--green-dark);}
+  /* --- Responsive safeguard for the tab bar on narrow screens ---
+     Phones don't have room for 4 equal no-wrap tabs, so below 560px we shrink the
+     font/padding a touch, and below 420px we let the bar scroll sideways (with the
+     scrollbar hidden) and stop the tabs from squashing, so labels stay readable. */
+  @media (max-width:560px){
+    .maintabs{gap:6px;}
+    .maintab{font-size:.8rem;padding:10px 6px;border-radius:12px;}
+  }
+  @media (max-width:420px){
+    .maintabs{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;}
+    .maintabs::-webkit-scrollbar{display:none;}
+    .maintab{flex:0 0 auto;font-size:.82rem;padding:10px 14px;}
+  }
 
   /* ---------- Toolbar row (title + action buttons) ---------- */
   .toolbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;}
@@ -140,6 +153,40 @@
 
   /* ---------- To Try cards ---------- */
   .try-card{background:var(--card);border-radius:18px;box-shadow:var(--shadow-sm);padding:16px 18px 16px 78px;margin-bottom:13px;position:relative;border:2px solid #eef4ec;}
+
+  /* ---- Location line shown on leaderboard + to-try cards ---- */
+  .mloc,.tloc{font-size:.82rem;color:#5c7a66;margin-top:2px;display:flex;align-items:center;gap:4px;}
+
+  /* ============================================================================
+     AI PICKS TAB  (recommendation matrix + FROM config + weather widget)
+     ============================================================================ */
+  /* The "where am I starting from" configurator row. */
+  .fromcfg{background:var(--card);border-radius:16px;box-shadow:var(--shadow-sm);border:2px solid var(--mid);padding:14px 16px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;}
+  .fromcfg .grow{flex:1;min-width:220px;}
+  .fromcfg label{display:block;font-weight:800;font-size:.85rem;color:var(--green-dark);margin-bottom:5px;}
+  .fromcfg input{width:100%;padding:10px 12px;border:2px solid var(--mid);border-radius:12px;font:inherit;color:var(--ink);}
+  /* Live "did we find it?" line under the starting-point input. */
+  .fromcheck{font-size:.82rem;margin-top:6px;min-height:1.1em;display:flex;align-items:center;gap:5px;}
+  .fromcheck.ok{color:var(--green-dark);font-weight:700;}
+  .fromcheck.bad{color:#c0483b;font-weight:700;}
+  .fromcheck.wait{color:#9bb0a2;font-style:italic;}
+
+  /* The little "weather right now at your starting point" card. */
+  .weatherbox{background:linear-gradient(135deg,#eafaef,#ffffff);border-radius:16px;box-shadow:var(--shadow-sm);border:2px solid var(--mid);padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:14px;}
+  .weatherbox .wemoji{font-size:2.4rem;line-height:1;}
+  .weatherbox .wtemp{font-size:1.5rem;font-weight:800;color:var(--green-deep);}
+  .weatherbox .wdesc{font-size:.9rem;color:#4a6b55;}
+  .weatherbox .wtip{font-size:.86rem;color:var(--green-dark);font-weight:700;margin-top:3px;}
+
+  /* The responsive grid of recommendation cards. */
+  .recogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:13px;}
+  .recocard{background:var(--card);border-radius:18px;box-shadow:var(--shadow-sm);border:2px solid #eef4ec;padding:15px 16px;position:relative;transition:.18s;}
+  .recocard:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:var(--mid);}
+  .recocard .rc-mood{font-size:.8rem;font-weight:800;color:var(--lc);text-transform:uppercase;letter-spacing:.03em;display:flex;align-items:center;gap:6px;}
+  .recocard .rc-name{font-size:1.15rem;font-weight:800;color:var(--green-deep);margin:6px 0 2px;}
+  .recocard .rc-metric{display:inline-block;background:var(--light);color:var(--green-dark);font-weight:800;font-size:.8rem;padding:2px 9px;border-radius:999px;margin-bottom:6px;}
+  .recocard .rc-why{font-size:.86rem;color:#4a6b55;line-height:1.35;}
+  .recocard .rc-empty{font-size:.86rem;color:#9bb0a2;font-style:italic;}
   .try-card .tavatar{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:52px;height:52px;object-fit:contain;filter:drop-shadow(0 3px 4px rgba(21,112,47,.25));}
   .try-card .tname{font-size:1.1rem;font-weight:800;}
   .try-card .tmeta{display:flex;gap:14px;align-items:center;margin-top:8px;flex-wrap:wrap;}
@@ -199,6 +246,20 @@
   /* photo upload preview thumbnail inside modals */
   .photoprev{margin-top:8px;}
   .photoprev img{max-height:120px;max-width:100%;border-radius:10px;border:2px solid var(--mid);}
+
+  /* ---- Cute photo upload button ----
+     We hide the browser's default (ugly) file input and use a soft mint pill
+     label in its place. The native input still lives inside the label, so
+     tapping the pill opens the file picker exactly as before.                    */
+  .filepick{position:relative;display:inline-flex;}
+  .filepick input[type=file]{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;}
+  .filepick .fpbtn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#e8f6ec,#d6f0dd);
+    color:var(--green-dark);font-weight:800;font-size:.92rem;border:2px dashed var(--lc);
+    border-radius:999px;padding:10px 18px;cursor:pointer;transition:.16s;box-shadow:var(--shadow-sm);}
+  .filepick .fpbtn .cam{font-size:1.15rem;transition:transform .2s;}
+  .filepick:hover .fpbtn{background:linear-gradient(135deg,#d6f0dd,#c3ebcf);border-style:solid;transform:translateY(-2px);box-shadow:var(--shadow);}
+  .filepick:hover .fpbtn .cam{transform:scale(1.15) rotate(-6deg);}
+  .filepick:active .fpbtn{transform:translateY(0);}
   .filebtn{display:inline-block;}
 
   /* star rating rows in the vote modal */
@@ -273,6 +334,7 @@
     <div class="maintab active" id="mtBoard" onclick="switchTab('board')">🏆 Leaderboard</div>
     <div class="maintab" id="mtTry" onclick="switchTab('try')">📝 To Try</div>
     <div class="maintab" id="mtPodium" onclick="switchTab('podium')">🥇 Podium</div>
+    <div class="maintab" id="mtPicks" onclick="switchTab('picks')">🤔 What Should I Get?</div>
   </div>
 
   <!-- ---- Leaderboard tab ---- -->
@@ -297,6 +359,25 @@
   <div id="tabPodium" class="hidden">
     <div class="toolbar"><h2>🥇 Podium</h2></div>
     <div class="podiumwrap"><div id="podium" class="podium"></div><div id="podiumEmpty"></div></div>
+  </div>
+
+  <!-- ---- "What Should I Get?" tab (recommendation matrix + starting point + weather) ---- -->
+  <div id="tabPicks" class="hidden">
+    <div class="toolbar"><h2>🤔 What Should I Get?</h2></div>
+    <!-- Set the starting point used for distance + weather. Saved on this device. -->
+    <div class="fromcfg">
+      <div class="grow">
+        <label>📍 Starting from (configurable)</label>
+        <input id="fromInput" placeholder="Postal code (e.g. 018960) or place name" autocomplete="off" oninput="onFromInput()">
+        <!-- Live "did we find it?" indicator, updated as you type. -->
+        <div id="fromCheck" class="fromcheck"></div>
+      </div>
+      <button class="btn" onclick="saveFrom()">Update</button>
+    </div>
+    <!-- Live weather for the starting point, with a quick matcha-run tip. -->
+    <div id="weatherBox" class="weatherbox"></div>
+    <!-- The recommendation grid: one card per mood / budget / situation. -->
+    <div id="recoGrid" class="recogrid"></div>
   </div>
 
   <!-- <footer>
@@ -329,8 +410,17 @@
     <p class="sub" id="addSub">A matcha you've tried. Pick a character, add a photo and a first review if you like!</p>
     <div class="field" id="fldName"><label>Name / Brand</label><input id="addName" placeholder="e.g. Ippodo Ceremonial" autocomplete="off"><div class="err" id="nameErr"></div></div>
     <div class="field"><label>Price (optional)</label><div class="priceinput"><span class="cur">$</span><input id="addPrice" inputmode="decimal" placeholder="6.50" oninput="sanitizePrice(this)"></div></div>
+    <div class="field"><label>Location (optional)</label><input id="addLocation" placeholder="Postal code (e.g. 238873) or place name" autocomplete="off"><div class="err" style="color:#9bb0a2;font-style:italic;">Postal code works best. Used for distance + convenience picks.</div></div>
     <div class="field"><label>Choose a character</label><div class="charpick" id="charPick"></div></div>
-    <div class="field"><label>Photo (optional)</label><input type="file" id="addPhoto" accept="image/*" onchange="onPhotoPick(this,'add')"><div class="photoprev" id="addPhotoPrev"></div></div>
+    <div class="field"><label>Photo (optional)</label><label class="filepick"><span class="fpbtn"><span class="cam">📷</span> Add a photo~</span><input type="file" id="addPhoto" accept="image/*" onchange="onPhotoPick(this,'add')"></label><div class="photoprev" id="addPhotoPrev"></div></div>
+    <!-- Optional star rating captured at the same time as adding the matcha.
+         Mirrors the standalone Rate modal; leave blank to skip, or fill all 3. -->
+    <div class="field" id="fldRating">
+      <label>Rate it now (optional)</label>
+      <div class="rate-row"><div class="lbl">🍵 Taste <small>flavour, balance, umami</small></div><div class="stars" data-cat="taste"></div></div>
+      <div class="rate-row"><div class="lbl">✨ Quality <small>grade, texture, freshness</small></div><div class="stars" data-cat="quality"></div></div>
+      <div class="rate-row"><div class="lbl">💰 Value <small>worth the price?</small></div><div class="stars" data-cat="value"></div></div>
+    </div>
     <div class="field" id="fldReview"><label>First review (optional)</label><textarea id="addReview" placeholder="What did you think?"></textarea></div>
     <div class="modal-actions"><button class="btn ghost" onclick="closeAdd()">Cancel</button><button class="btn" id="addBtn" onclick="submitAdd()">Add it</button></div>
   </div>
@@ -346,9 +436,9 @@
     <div id="reviewFormWrap">
       <div class="subhead">Add your review</div>
       <div class="field"><textarea id="reviewText" placeholder="Share your thoughts..."></textarea></div>
-      <div class="field"><label>Photo (optional)</label><input type="file" id="reviewPhoto" accept="image/*" onchange="onPhotoPick(this,'review')"><div class="photoprev" id="reviewPhotoPrev"></div></div>
+      <div class="field"><label>Photo (optional)</label><label class="filepick"><span class="fpbtn"><span class="cam">📷</span> Add a photo~</span><input type="file" id="reviewPhoto" accept="image/*" onchange="onPhotoPick(this,'review')"></label><div class="photoprev" id="reviewPhotoPrev"></div></div>
     </div>
-    <div class="modal-actions"><button class="btn ghost" onclick="closeReviews()">Close</button><button class="btn" id="reviewPostBtn" onclick="submitReview()">Post review</button></div>
+    <div class="modal-actions"><button class="btn ghost" onclick="closeReviews()">Close</button><button class="btn ghost hidden" id="reviewCancelBtn" onclick="cancelReviewEdit()">Cancel edit</button><button class="btn" id="reviewPostBtn" onclick="submitReview()">Post review</button></div>
   </div>
 </div>
 
@@ -360,6 +450,7 @@
     <p class="sub">A cafe or shop the team wants to check out.</p>
     <div class="field" id="fldStore"><label>Store name</label><input id="tryStore" placeholder="e.g. Stonemill Matcha" autocomplete="off"><div class="err" id="storeErr"></div></div>
     <div class="field"><label>Est. price (generic matcha latte)</label><div class="priceinput"><span class="cur">$</span><input id="tryPrice" inputmode="decimal" placeholder="6.50" oninput="sanitizePrice(this)"></div></div>
+    <div class="field"><label>Location (optional)</label><input id="tryLocation" placeholder="Postal code (e.g. 237994) or place name" autocomplete="off"><div class="err" style="color:#9bb0a2;font-style:italic;">Postal code works best. Used for distance + convenience picks.</div></div>
     <div class="field"><label>Notes (optional)</label><input id="tryNotes" placeholder="e.g. try their matcha soft serve!" autocomplete="off"></div>
     <div class="modal-actions"><button class="btn ghost" onclick="closeTry()">Cancel</button><button class="btn" onclick="submitTry()">Add to list</button></div>
   </div>
@@ -418,8 +509,8 @@ function mascotSrc(k){ return MASCOTS[k] || MASCOTS.bowl; }
    3) SEED DATA  — only used the very first time (empty database / local mode).
    ============================================================================ */
 const SEED=[
-  {id:"m1",name:"Ippodo Ceremonial",price:"$7.50",char:"bowl",photo:"",by:"team",byKey:"seed",votes:[],reviews:[]},
-  {id:"m2",name:"Matcha Latte",price:"$6.00",char:"cup",photo:"",by:"team",byKey:"seed",votes:[],reviews:[]}
+  {id:"m1",name:"Ippodo Ceremonial",price:"$7.50",location:"Takashimaya, Orchard Road, Singapore",char:"bowl",photo:"",by:"team",byKey:"seed",votes:[],reviews:[]},
+  {id:"m2",name:"Matcha Latte",price:"$6.00",location:"Raffles Place, Singapore",char:"cup",photo:"",by:"team",byKey:"seed",votes:[],reviews:[]}
 ];
 
 /* ============================================================================
@@ -684,10 +775,13 @@ function switchTab(t){
   document.getElementById("mtBoard").classList.toggle("active",t==="board");
   document.getElementById("mtTry").classList.toggle("active",t==="try");
   document.getElementById("mtPodium").classList.toggle("active",t==="podium");
+  document.getElementById("mtPicks").classList.toggle("active",t==="picks");
   document.getElementById("tabBoard").classList.toggle("hidden",t!=="board");
   document.getElementById("tabTry").classList.toggle("hidden",t!=="try");
   document.getElementById("tabPodium").classList.toggle("hidden",t!=="podium");
+  document.getElementById("tabPicks").classList.toggle("hidden",t!=="picks");
   if(t==="podium") renderPodium();
+  if(t==="picks") renderPicks();   // build the reco matrix + refresh weather/distance
 }
 /* Show the right toolbar buttons for the current user. Anyone signed in can add
    a matcha or a spot; only admins get "Manage users".                          */
@@ -719,7 +813,7 @@ function renderBoard(){
       <div class="rankbadge">${rank}</div>
       ${rank===1&&n?'<div class="crown">👑</div>':''}
       <img class="avatar" src="${mascotSrc(m.char)}">
-      <div class="rowtop"><div><div class="mname">${esc(m.name)}</div></div>${m.price?`<div class="price">${esc(m.price)}</div>`:''}</div>
+      <div class="rowtop"><div><div class="mname">${esc(m.name)}</div>${m.location?`<div class="mloc">📍 ${esc(m.location)}</div>`:''}</div>${m.price?`<div class="price">${esc(m.price)}</div>`:''}</div>
       ${m.photo?`<img class="cardphoto" src="${m.photo}" onclick="openLightbox('${m.photo}')">`:''}
       <div class="scores">
         <span class="scorebit">Overall <span class="overall">${n?ov.toFixed(2):"–"}</span></span>
@@ -845,6 +939,7 @@ function removeMyVote(matchaId){ if(session) removeVote(matchaId, session.uKey);
 let pickedChar="bowl";     // currently chosen character in the picker
 let editingId=null;        // set when editing an existing matcha (else it's an add)
 let movingTryId=null;      // set when promoting a To-Try spot onto the board
+let pendingAddRating={taste:0,quality:0,value:0};  // optional stars picked in the Add modal
 
 /* Draw the character picker grid.                                               */
 function buildCharPicker(){
@@ -852,22 +947,34 @@ function buildCharPicker(){
   CHAR_KEYS.forEach(k=>{const d=document.createElement("div");d.className="opt"+(k===pickedChar?" sel":"");d.title=k;d.innerHTML=`<img src="${MASCOTS[k]}" alt="${k}">`;d.onclick=()=>{pickedChar=k;buildCharPicker();};grid.appendChild(d);});
 }
 
+/* Draw the three rows of clickable stars inside the ADD modal (optional rating). */
+function buildAddStars(){
+  document.querySelectorAll("#addOverlay .stars").forEach(box=>{
+    const cat=box.dataset.cat; box.innerHTML="";
+    for(let s=1;s<=5;s++){const sp=document.createElement("span");sp.className="star"+(s<=pendingAddRating[cat]?" on":"");sp.textContent="★";sp.onclick=()=>{pendingAddRating[cat]=s;buildAddStars();};box.appendChild(sp);}
+  });
+}
+
 /* Open the modal to ADD a new matcha (anyone signed in).                        */
 function openAdd(){
   if(!loggedIn()){toast("Log in or continue as a guest first 🙂",true);return;}
   editingId=null; movingTryId=null; pendingAddPhoto="";
   pickedChar=CHAR_KEYS[Math.floor(Math.random()*CHAR_KEYS.length)];  // fun random default
+  pendingAddRating={taste:0,quality:0,value:0};   // start with a blank (optional) rating
   document.getElementById("addName").value="";
   document.getElementById("addPrice").value="";
+  document.getElementById("addLocation").value="";
   document.getElementById("addPhoto").value="";
   document.getElementById("addPhotoPrev").innerHTML="";
   document.getElementById("addReview").value="";
   document.getElementById("fldName").classList.remove("bad");
   document.getElementById("addTitle").textContent="Add a matcha";
-  document.getElementById("addSub").textContent="A matcha you've tried. Pick a character, add a photo and a first review if you like!";
+  document.getElementById("addSub").textContent="A matcha you've tried. Pick a character, add a photo, rate it and leave a first review if you like!";
   document.getElementById("addBtn").textContent="Add it";
   document.getElementById("fldReview").classList.remove("hidden");   // review only on add
+  document.getElementById("fldRating").classList.remove("hidden");   // rating only on add
   buildCharPicker();
+  buildAddStars();
   document.getElementById("addOverlay").classList.add("open");
 }
 
@@ -879,6 +986,7 @@ function openEdit(id){
   pickedChar=m.char||"bowl";
   document.getElementById("addName").value=m.name;
   document.getElementById("addPrice").value=(m.price||"").replace(/[^0-9.]/g,"");
+  document.getElementById("addLocation").value=m.location||"";
   document.getElementById("addPhoto").value="";
   document.getElementById("addPhotoPrev").innerHTML=m.photo?`<img src="${m.photo}">`:"";
   document.getElementById("fldName").classList.remove("bad");
@@ -886,6 +994,7 @@ function openEdit(id){
   document.getElementById("addSub").textContent="Update the name, price, character or photo.";
   document.getElementById("addBtn").textContent="Save changes";
   document.getElementById("fldReview").classList.add("hidden");   // no "first review" when editing
+  document.getElementById("fldRating").classList.add("hidden");   // no rating row when editing
   buildCharPicker();
   document.getElementById("addOverlay").classList.add("open");
 }
@@ -896,6 +1005,7 @@ async function submitAdd(){
   if(!loggedIn()){toast("Log in first 🙂",true);return;}
   const nameRaw=document.getElementById("addName").value.trim();
   const price=document.getElementById("addPrice").value.trim();
+  const locRaw=document.getElementById("addLocation").value.trim();
   const fld=document.getElementById("fldName"),errEl=document.getElementById("nameErr");
   if(!nameRaw){fld.classList.add("bad");errEl.textContent="Give it a name at least 🙂";return;}
   // 1) exact duplicate (ignoring case/spacing) is never allowed
@@ -912,9 +1022,9 @@ async function submitAdd(){
 
   if(editingId){
     // ----- EDIT an existing matcha (keeps its votes & reviews) -----
-    const eid=editingId, ch=pickedChar, photo=pendingAddPhoto;
+    const eid=editingId, ch=pickedChar, photo=pendingAddPhoto, loc=locRaw;
     closeAdd();
-    await persist(state=>{const m=state.find(x=>x.id===eid);if(m){m.name=nameRaw;m.price=fmtPrice(price);m.char=ch;m.photo=photo;}return state;});
+    await persist(state=>{const m=state.find(x=>x.id===eid);if(m){m.name=nameRaw;m.price=fmtPrice(price);m.char=ch;m.photo=photo;m.location=loc;}return state;});
     toastMascot(nameRaw+" updated! ✏️",mascotSrc(ch));
     return;
   }
@@ -925,7 +1035,17 @@ async function submitAdd(){
   if(reviewText||pendingAddPhoto){   // an optional first review
     reviews.push({by:session.u,byKey:session.uKey,text:reviewText,photo:pendingAddPhoto,ts:Date.now()});
   }
-  const item={id:"m"+Date.now(),name:nameRaw,price:fmtPrice(price),char:pickedChar,photo:pendingAddPhoto,by:session.u,byKey:session.uKey,votes:[],reviews:reviews};
+  // Optional star rating: it's all-or-nothing (same rule as the Rate modal).
+  // If the user starts rating but leaves a category blank, nudge them.
+  const ratedCount=CATS.filter(c=>pendingAddRating[c]>0).length;
+  const votes=[];
+  if(ratedCount>0 && ratedCount<CATS.length){
+    toast("Give a star for all 3 categories, or leave the rating blank",true);return;
+  }
+  if(ratedCount===CATS.length){   // a complete rating -> record it as this user's vote
+    votes.push({name:session.u,key:session.uKey,taste:pendingAddRating.taste,quality:pendingAddRating.quality,value:pendingAddRating.value,ts:Date.now()});
+  }
+  const item={id:"m"+Date.now(),name:nameRaw,price:fmtPrice(price),location:locRaw,char:pickedChar,photo:pendingAddPhoto,by:session.u,byKey:session.uKey,votes:votes,reviews:reviews};
   const wasMoving=movingTryId;
   closeAdd();
   await persist(state=>{state.push(item);return state;});
@@ -946,22 +1066,34 @@ async function removeMatcha(id){
    14) REVIEWS  — text + optional photo, viewable in a pop-up per matcha.
    ============================================================================ */
 let reviewTarget=null;   // which matcha's reviews we're viewing
+let editingReviewIdx=null;  // index of the review currently being edited (null = writing a new one)
 
-function openReviews(id){
-  reviewTarget=id; pendingReviewPhoto="";
-  const m=data.find(x=>x.id===id); if(!m) return;
-  document.getElementById("reviewTitle").textContent="💬 "+m.name;
-  document.getElementById("reviewSub").textContent=(m.reviews||[]).length?((m.reviews.length)+" review"+(m.reviews.length===1?"":"s")):"No reviews yet — be the first!";
+/* Put the review form back into "write a new review" mode.                      */
+function resetReviewForm(){
+  editingReviewIdx=null; pendingReviewPhoto="";
   document.getElementById("reviewText").value="";
   document.getElementById("reviewPhoto").value="";
   document.getElementById("reviewPhotoPrev").innerHTML="";
+  const head=document.querySelector("#reviewFormWrap .subhead");
+  if(head) head.textContent="Add your review";
+  document.getElementById("reviewPostBtn").textContent="Post review";
+  const cancel=document.getElementById("reviewCancelBtn");
+  if(cancel) cancel.classList.add("hidden");
+}
+
+function openReviews(id){
+  reviewTarget=id;
+  const m=data.find(x=>x.id===id); if(!m) return;
+  document.getElementById("reviewTitle").textContent="💬 "+m.name;
+  document.getElementById("reviewSub").textContent=(m.reviews||[]).length?((m.reviews.length)+" review"+(m.reviews.length===1?"":"s")):"No reviews yet — be the first!";
+  resetReviewForm();   // always start in "new review" mode
   // hide the "add review" form for people who aren't signed in
   document.getElementById("reviewFormWrap").classList.toggle("hidden", !loggedIn());
   document.getElementById("reviewPostBtn").classList.toggle("hidden", !loggedIn());
   renderReviews(m);
   document.getElementById("reviewOverlay").classList.add("open");
 }
-function closeReviews(){document.getElementById("reviewOverlay").classList.remove("open");}
+function closeReviews(){resetReviewForm();document.getElementById("reviewOverlay").classList.remove("open");}
 
 /* Draw the list of reviews inside the modal.                                    */
 function renderReviews(m){
@@ -976,7 +1108,8 @@ function renderReviews(m){
     return `<div class="review">
         <div class="ravatar">${initial}</div>
         <div class="rbody">
-          <div class="rby">${esc(r.by)}<span class="rtime">${when}</span>
+          <div class="rby">${esc(r.by)}<span class="rtime">${when}${r.edited?" · edited":""}</span>
+            ${canDel?`<button class="rdel" title="Edit review" onclick="editReview('${m.id}',${realIdx})">✏️</button>`:''}
             ${canDel?`<button class="rdel" title="Delete review" onclick="removeReview('${m.id}',${realIdx})">🗑</button>`:''}</div>
           ${r.text?`<div class="rtext">${esc(r.text)}</div>`:''}
           ${r.photo?`<img class="rphoto" src="${r.photo}" onclick="openLightbox('${r.photo}')">`:''}
@@ -984,16 +1117,57 @@ function renderReviews(m){
       </div>`;
   }).join("");
 }
-/* Post a new review to the current matcha.                                      */
+/* Load one of your own reviews into the form so you can edit it.                */
+function editReview(matchaId, idx){
+  const m=data.find(x=>x.id===matchaId); if(!m) return;
+  const r=(m.reviews||[])[idx]; if(!r) return;
+  if(!(isAdmin()||r.byKey===session.uKey)){toast("You can only edit your own review",true);return;}
+  editingReviewIdx=idx;
+  pendingReviewPhoto=r.photo||"";
+  document.getElementById("reviewText").value=r.text||"";
+  document.getElementById("reviewPhoto").value="";
+  document.getElementById("reviewPhotoPrev").innerHTML=r.photo?`<img src="${r.photo}">`:"";
+  const head=document.querySelector("#reviewFormWrap .subhead");
+  if(head) head.textContent="Edit your review";
+  document.getElementById("reviewPostBtn").textContent="Save changes";
+  const cancel=document.getElementById("reviewCancelBtn");
+  if(cancel) cancel.classList.remove("hidden");
+  document.getElementById("reviewText").focus();
+}
+/* Cancel an in-progress edit and go back to writing a new review.               */
+function cancelReviewEdit(){ resetReviewForm(); }
+
+/* Post a new review — or save changes when editing an existing one.             */
 async function submitReview(){
   if(!loggedIn()){toast("Log in first 🙂",true);return;}
   const text=document.getElementById("reviewText").value.trim();
   if(!text && !pendingReviewPhoto){toast("Write something or add a photo 🙂",true);return;}
-  const id=reviewTarget, rev={by:session.u,byKey:session.uKey,text:text,photo:pendingReviewPhoto,ts:Date.now()};
+  const id=reviewTarget;
+  const photo=pendingReviewPhoto;
+  if(editingReviewIdx!==null){
+    // ----- SAVE an edit to an existing review -----
+    const eidx=editingReviewIdx;
+    await persist(state=>{
+      const m=state.find(x=>x.id===id);
+      if(m&&m.reviews&&m.reviews[eidx]){
+        const r=m.reviews[eidx];
+        if(isAdmin()||r.byKey===session.uKey){   // guard against tampering
+          r.text=text; r.photo=photo; r.edited=Date.now();
+        }
+      }
+      return state;
+    });
+    const m=data.find(x=>x.id===id);
+    resetReviewForm();
+    renderReviews(m);
+    toast("Review updated ✏️");
+    return;
+  }
+  // ----- POST a brand new review -----
+  const rev={by:session.u,byKey:session.uKey,text:text,photo:photo,ts:Date.now()};
   await persist(state=>{const m=state.find(x=>x.id===id);if(m){m.reviews=m.reviews||[];m.reviews.push(rev);}return state;});
-  // refresh the open modal with the new review
   const m=data.find(x=>x.id===id);
-  document.getElementById("reviewText").value="";document.getElementById("reviewPhoto").value="";document.getElementById("reviewPhotoPrev").innerHTML="";pendingReviewPhoto="";
+  resetReviewForm();
   document.getElementById("reviewSub").textContent=(m.reviews.length)+" review"+(m.reviews.length===1?"":"s");
   renderReviews(m);
   toast("Review posted 💬");
@@ -1027,6 +1201,7 @@ function renderTry(){
     div.innerHTML=`
       <img class="tavatar" src="${mascotSrc(ico)}">
       <div class="tname">${esc(s.store)}</div>
+      ${s.location?`<div class="tloc">📍 ${esc(s.location)}</div>`:''}
       <div class="tmeta">
         ${s.price?`<span class="tprice">~${esc(s.price)} latte</span>`:''}
         <span class="tby">added by ${esc(s.by)}</span>
@@ -1044,7 +1219,7 @@ function renderTry(){
 function openTry(){
   if(!loggedIn()){toast("Log in or continue as a guest first 🙂",true);return;}
   editingTryId=null;
-  document.getElementById("tryStore").value="";document.getElementById("tryPrice").value="";document.getElementById("tryNotes").value="";
+  document.getElementById("tryStore").value="";document.getElementById("tryPrice").value="";document.getElementById("tryNotes").value="";document.getElementById("tryLocation").value="";
   document.getElementById("fldStore").classList.remove("bad");
   document.querySelector("#tryOverlay h3").textContent="Add a spot to try";
   document.querySelector("#tryOverlay .modal-actions .btn:last-child").textContent="Add to list";
@@ -1057,6 +1232,7 @@ function openEditTry(id){
   document.getElementById("tryStore").value=sp.store;
   document.getElementById("tryPrice").value=(sp.price||"").replace(/[^0-9.]/g,"");
   document.getElementById("tryNotes").value=sp.notes||"";
+  document.getElementById("tryLocation").value=sp.location||"";
   document.getElementById("fldStore").classList.remove("bad");
   document.querySelector("#tryOverlay h3").textContent="✏️ Edit spot";
   document.querySelector("#tryOverlay .modal-actions .btn:last-child").textContent="Save changes";
@@ -1069,6 +1245,7 @@ function submitTry(){
   const storeN=document.getElementById("tryStore").value.trim();
   const price=document.getElementById("tryPrice").value.trim();
   const notes=document.getElementById("tryNotes").value.trim();
+  const loc=document.getElementById("tryLocation").value.trim();
   const fld=document.getElementById("fldStore"),errEl=document.getElementById("storeErr");
   if(!storeN){fld.classList.add("bad");errEl.textContent="Give the store a name 🙂";return;}
   // block duplicates (excluding the one being edited)
@@ -1079,11 +1256,11 @@ function submitTry(){
   fld.classList.remove("bad");
   if(editingTryId){
     const sp=toTry.find(x=>x.id===editingTryId);
-    if(sp){sp.store=storeN;sp.price=fmtPrice(price);sp.notes=notes;}
+    if(sp){sp.store=storeN;sp.price=fmtPrice(price);sp.notes=notes;sp.location=loc;}
     saveTry();renderTry();closeTry();toastMascot(storeN+" updated! ✏️",mascotSrc("icecream"));
     return;
   }
-  toTry.push({id:"t"+Date.now(),store:storeN,price:fmtPrice(price),notes:notes,by:session.u,byKey:session.uKey,ts:Date.now()});
+  toTry.push({id:"t"+Date.now(),store:storeN,price:fmtPrice(price),notes:notes,location:loc,by:session.u,byKey:session.uKey,ts:Date.now()});
   saveTry();renderTry();closeTry();toastMascot(storeN+" added to the list!",mascotSrc("icecream"));
 }
 /* Remove a wishlist spot — admin or the person who added it.                    */
@@ -1102,8 +1279,362 @@ function tryToBoard(id){
   movingTryId=id;                  // ...but remember we're promoting
   document.getElementById("addName").value=s.store;
   document.getElementById("addPrice").value=(s.price||"").replace(/[^0-9.]/g,"");
+  document.getElementById("addLocation").value=s.location||"";   // carry the spot's location over
   document.getElementById("addTitle").textContent="✅ Tried it! Add to board";
-  document.getElementById("addSub").textContent="Rank "+s.store+" on the leaderboard. Pick a character!";
+  document.getElementById("addSub").textContent="Rank "+s.store+" on the leaderboard. Pick a character, rate it and leave a first review!";
+}
+
+/* ============================================================================
+   15b) AI PICKS  — a recommendation matrix that suggests a matcha for your mood
+        or budget, plus a configurable starting point with live distance and
+        weather (powered by the free, no-key Open-Meteo APIs).
+   ============================================================================ */
+
+/* ---- Starting point (the "FROM" location) -------------------------------------
+   Saved on this device so everyone can set their own starting point. Defaults to
+   Asia Square Tower 1, Singapore.                                               */
+const FROMKEY="matchaFrom";
+function getFrom(){return store.get(FROMKEY)||"Asia Square Tower 1, Singapore";}
+function saveFrom(){
+  const v=document.getElementById("fromInput").value.trim();
+  store.set(FROMKEY, v||"Asia Square Tower 1, Singapore");
+  _weatherCache=null;                 // force a weather refresh for the new place
+  toast("Starting point updated 📍");
+  renderPicks();
+}
+/* Live ✓/✗ feedback under the starting-point box as the user types.
+   Debounced so we don't hammer the geocoder on every keystroke, and each lookup
+   is tagged with a sequence number so a slow older reply can't overwrite a newer
+   one. Postal codes get their friendly resolved name shown too.                 */
+let _fromCheckTimer=null, _fromCheckSeq=0;
+function onFromInput(){
+  const el=document.getElementById("fromCheck");
+  const raw=document.getElementById("fromInput").value.trim();
+  clearTimeout(_fromCheckTimer);
+  if(!raw){el.className="fromcheck";el.innerHTML="";return;}
+  el.className="fromcheck wait";el.innerHTML="⏳ Checking...";
+  const seq=++_fromCheckSeq;
+  _fromCheckTimer=setTimeout(async()=>{
+    const g=await geocode(raw);
+    if(seq!==_fromCheckSeq)return;           // a newer keystroke already superseded this
+    if(g){
+      el.className="fromcheck ok";
+      el.innerHTML="✓ Found"+(g.label?`: <strong>${esc(g.label)}</strong>`:"");
+    }else{
+      el.className="fromcheck bad";
+      el.innerHTML="✗ Couldn't find that, try a postal code or a district / city name.";
+    }
+  },450);
+}
+
+/* ---- Geocoding (place name to lat/lon) ----------------------------------------
+   Uses Open-Meteo's free geocoding API. Results are cached (in memory and on the
+   device) so we never look up the same place twice. Business names rarely resolve
+   exactly, so we fall back to progressively broader parts of the address
+   (e.g. "Ippodo, Takashimaya, Singapore" -> "Takashimaya, Singapore" -> "Singapore").*/
+let _geoCache={};
+try{_geoCache=JSON.parse(store.get("matchaGeo")||"{}");}catch(e){_geoCache={};}
+async function geoQuery(q){
+  try{
+    const r=await fetch("https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&format=json&name="+encodeURIComponent(q));
+    if(!r.ok)return null;
+    const j=await r.json();
+    if(j&&j.results&&j.results.length)return {lat:j.results[0].latitude,lon:j.results[0].longitude};
+  }catch(e){/* offline or blocked; fail quietly */}
+  return null;
+}
+/* Built-in coords for the office + common SG spots, so the most-used places work
+   instantly, even when the online geocoder can't resolve a building name or the
+   network blocks open-meteo.com. Substring match, so "Ippodo, Takashimaya" still
+   hits "takashimaya". Keep the country-level "singapore" catch-all LAST.         */
+const GEO_KNOWN=[
+  {m:"asia square",   lat:1.2795, lon:103.8536},
+  {m:"marina bay",    lat:1.2820, lon:103.8585},
+  {m:"marina view",   lat:1.2795, lon:103.8536},
+  {m:"raffles place", lat:1.2839, lon:103.8515},
+  {m:"tanjong pagar", lat:1.2765, lon:103.8460},
+  {m:"takashimaya",   lat:1.3018, lon:103.8348},
+  {m:"ngee ann",      lat:1.3018, lon:103.8348},
+  {m:"orchard",       lat:1.3040, lon:103.8318},
+  {m:"great world",   lat:1.2942, lon:103.8322},
+  {m:"suntec",        lat:1.2955, lon:103.8590},
+  {m:"bugis",         lat:1.3009, lon:103.8559},
+  {m:"jurong",        lat:1.3329, lon:103.7436},
+  {m:"changi",        lat:1.3644, lon:103.9915},
+  {m:"singapore",     lat:1.3521, lon:103.8198}   // catch-all, keep last
+];
+function knownGeo(name){
+  const s=String(name||"").toLowerCase();
+  for(const k of GEO_KNOWN){ if(s.includes(k.m)) return {lat:k.lat,lon:k.lon,label:k.m.replace(/\b\w/g,c=>c.toUpperCase())}; }
+  return null;
+}
+
+/* ---- Singapore postal codes ---------------------------------------------------
+   SG postal codes are 6 digits and pin an exact building, so they're the most
+   precise way to locate a matcha spot. We resolve them in 3 steps:
+     1) OneMap (data.gov.sg) - the official, free, no-key SG geocoder. Exact.
+     2) Built-in postal-SECTOR table (the first 2 digits) - an instant, offline
+        approximation used if OneMap is unreachable (e.g. office firewall).
+     3) Fall through to the normal name-based geocoder.                           */
+function extractPostal(s){
+  // pull the first standalone 6-digit group (handles "S018960", "Singapore 018960")
+  const m=String(s||"").match(/(?:^|\D)(\d{6})(?:\D|$)/);
+  return m?m[1]:null;
+}
+async function oneMapGeo(postal){
+  try{
+    const r=await fetch("https://www.onemap.gov.sg/api/common/elastic/search?returnGeom=Y&getAddrDetails=Y&pageNum=1&searchVal="+encodeURIComponent(postal));
+    if(!r.ok)return null;
+    const j=await r.json();
+    if(j&&j.results&&j.results.length){
+      const h=j.results[0];
+      const lat=parseFloat(h.LATITUDE), lon=parseFloat(h.LONGITUDE);
+      if(!isNaN(lat)&&!isNaN(lon))return {lat,lon,label:(h.BUILDING&&h.BUILDING!=="NIL"?h.BUILDING:h.ADDRESS)||""};
+    }
+  }catch(e){/* offline or blocked; fall back below */}
+  return null;
+}
+/* First 2 digits of a SG postal code = the postal sector. Each sector belongs to
+   one of the 28 postal districts; we store a rough centroid per district so a
+   postal code always maps to *somewhere* sensible even without OneMap.          */
+const SG_DISTRICTS=[
+  {sectors:["01","02","03","04","05","06"], lat:1.2830, lon:103.8510, name:"Raffles Place / Marina (D1)"},
+  {sectors:["07","08"],                     lat:1.2760, lon:103.8460, name:"Tanjong Pagar / Anson (D2)"},
+  {sectors:["14","15","16"],                lat:1.2870, lon:103.8270, name:"Tiong Bahru / Queenstown (D3)"},
+  {sectors:["09","10"],                     lat:1.2660, lon:103.8220, name:"Harbourfront / Telok Blangah (D4)"},
+  {sectors:["11","12","13"],                lat:1.2900, lon:103.7900, name:"Clementi / Pasir Panjang (D5)"},
+  {sectors:["17"],                          lat:1.2900, lon:103.8520, name:"High Street / City Hall (D6)"},
+  {sectors:["18","19"],                     lat:1.3010, lon:103.8580, name:"Bugis / Golden Mile (D7)"},
+  {sectors:["20","21"],                     lat:1.3080, lon:103.8520, name:"Little India (D8)"},
+  {sectors:["22","23"],                     lat:1.3000, lon:103.8390, name:"Orchard / River Valley (D9)"},
+  {sectors:["24","25","26","27"],           lat:1.3130, lon:103.8130, name:"Bukit Timah / Holland (D10)"},
+  {sectors:["28","29","30"],                lat:1.3210, lon:103.8420, name:"Novena / Thomson (D11)"},
+  {sectors:["31","32","33"],                lat:1.3340, lon:103.8560, name:"Toa Payoh / Balestier (D12)"},
+  {sectors:["34","35","36","37"],           lat:1.3370, lon:103.8790, name:"Macpherson / Braddell (D13)"},
+  {sectors:["38","39","40","41"],           lat:1.3180, lon:103.8880, name:"Geylang / Eunos (D14)"},
+  {sectors:["42","43","44","45"],           lat:1.3050, lon:103.9050, name:"Katong / Joo Chiat (D15)"},
+  {sectors:["46","47","48"],                lat:1.3250, lon:103.9430, name:"Bedok / Upper East Coast (D16)"},
+  {sectors:["49","50","81"],                lat:1.3560, lon:103.9860, name:"Changi / Loyang (D17)"},
+  {sectors:["51","52"],                     lat:1.3540, lon:103.9440, name:"Tampines / Pasir Ris (D18)"},
+  {sectors:["53","54","55","82"],           lat:1.3700, lon:103.8970, name:"Hougang / Punggol (D19)"},
+  {sectors:["56","57"],                     lat:1.3550, lon:103.8480, name:"Bishan / Ang Mo Kio (D20)"},
+  {sectors:["58","59"],                     lat:1.3350, lon:103.7770, name:"Upper Bukit Timah / Ulu Pandan (D21)"},
+  {sectors:["60","61","62","63","64"],      lat:1.3330, lon:103.7420, name:"Jurong (D22)"},
+  {sectors:["65","66","67","68"],           lat:1.3800, lon:103.7620, name:"Bukit Panjang / Choa Chu Kang (D23)"},
+  {sectors:["69","70","71"],                lat:1.3900, lon:103.7000, name:"Lim Chu Kang / Tengah (D24)"},
+  {sectors:["72","73"],                     lat:1.4360, lon:103.7860, name:"Kranji / Woodlands (D25)"},
+  {sectors:["77","78"],                     lat:1.3760, lon:103.8250, name:"Upper Thomson / Springleaf (D26)"},
+  {sectors:["75","76"],                     lat:1.4290, lon:103.8350, name:"Yishun / Sembawang (D27)"},
+  {sectors:["79","80"],                     lat:1.4050, lon:103.8690, name:"Seletar (D28)"}
+];
+function sectorGeo(postal){
+  const two=String(postal).slice(0,2);
+  for(const g of SG_DISTRICTS){ if(g.sectors.includes(two)) return {lat:g.lat,lon:g.lon,label:g.name}; }
+  return null;
+}
+
+function cacheGeo(key,g){_geoCache[key]=g;store.set("matchaGeo",JSON.stringify(_geoCache));return g;}
+async function geocode(name){
+  const key=normName(name);
+  if(!key)return null;
+  if(_geoCache[key])return _geoCache[key];
+  // 1) Postal code? Resolve it precisely via OneMap, else approximate by sector.
+  const postal=extractPostal(name);
+  if(postal){
+    const om=await oneMapGeo(postal);
+    if(om)return cacheGeo(key,{lat:om.lat,lon:om.lon,label:om.label||""});   // exact building name
+    const sec=sectorGeo(postal);
+    if(sec)return cacheGeo(key,sec);                                          // approx district name
+  }
+  // 2) instant built-in name match, works offline / behind a firewall
+  const known=knownGeo(name);
+  if(known)return cacheGeo(key,known);
+  // 3) online name lookup, trying progressively broader parts of the address
+  const parts=String(name).split(",").map(s=>s.trim()).filter(Boolean);
+  const tries=[];
+  for(let i=0;i<parts.length;i++)tries.push(parts.slice(i).join(", "));   // drop leading segments
+  parts.forEach(p=>{if(!tries.includes(p))tries.push(p);});               // then each single part
+  if(!tries.some(t=>normName(t)==="singapore"))tries.push("Singapore");   // final safety net
+  for(const q of tries){
+    const g=await geoQuery(q);
+    if(g)return cacheGeo(key,g);
+  }
+  return null;
+}
+
+/* ---- Distance (great-circle km between two lat/lon points) --------------------*/
+function haversine(a,b){
+  const R=6371, toR=x=>x*Math.PI/180;
+  const dLat=toR(b.lat-a.lat), dLon=toR(b.lon-a.lon);
+  const s=Math.sin(dLat/2)**2+Math.cos(toR(a.lat))*Math.cos(toR(b.lat))*Math.sin(dLon/2)**2;
+  return 2*R*Math.asin(Math.sqrt(s));
+}
+
+/* ---- Weather (current conditions at the starting point) -----------------------
+   Cached for 15 minutes so we are polite to the free API.                       */
+let _weatherCache=null;
+let _weatherFail=null;   // "place" = couldn't map the location, "service" = API unreachable
+const WEATHER_TTL=15*60*1000;
+async function fetchWeather(){
+  const from=getFrom();
+  if(_weatherCache && _weatherCache.from===from && (Date.now()-_weatherCache.ts)<WEATHER_TTL) return _weatherCache;
+  _weatherFail=null;
+  const g=await geocode(from);
+  if(!g){_weatherFail="place";return null;}
+  try{
+    const r=await fetch("https://api.open-meteo.com/v1/forecast?current=temperature_2m,weather_code&latitude="+g.lat+"&longitude="+g.lon);
+    if(!r.ok)throw 0;
+    const j=await r.json();
+    _weatherCache={ts:Date.now(),from:from,temp:j.current.temperature_2m,code:j.current.weather_code,label:g.label||""};
+    return _weatherCache;
+  }catch(e){_weatherFail="service";}
+  return null;
+}
+/* Map a WMO weather code to a friendly emoji + label + "is it wet?" flag.        */
+function weatherInfo(code){
+  if(code===0)return{emoji:"☀️",desc:"Clear sky",wet:false};
+  if(code<=3)return{emoji:"⛅",desc:"Partly cloudy",wet:false};
+  if(code<=48)return{emoji:"🌫️",desc:"Foggy",wet:false};
+  if(code<=57)return{emoji:"🌦️",desc:"Drizzle",wet:true};
+  if(code<=67)return{emoji:"🌧️",desc:"Rainy",wet:true};
+  if(code<=77)return{emoji:"🌨️",desc:"Snow",wet:true};
+  if(code<=82)return{emoji:"🌧️",desc:"Rain showers",wet:true};
+  if(code<=86)return{emoji:"🌨️",desc:"Snow showers",wet:true};
+  return{emoji:"⛈️",desc:"Thunderstorm",wet:true};
+}
+/* Draw the little weather widget at the top of the "What Should I Get?" tab.     */
+async function renderWeather(){
+  const box=document.getElementById("weatherBox");
+  if(!box)return;
+  const cached=(_weatherCache && _weatherCache.from===getFrom())?_weatherCache:null;
+  if(!cached) box.innerHTML=`<div class="wemoji">⏳</div><div><div class="wdesc">Checking the weather at ${esc(getFrom())}...</div></div>`;
+  const w=await fetchWeather();
+  if(!w){
+    if(_weatherFail==="service")
+      box.innerHTML=`<div class="wemoji">📡</div><div><div class="wdesc">Weather service can't be reached right now. Your network may be blocking open-meteo.com, but distance picks still work fine.</div></div>`;
+    else
+      box.innerHTML=`<div class="wemoji">🌱</div><div><div class="wdesc">Couldn't find "${esc(getFrom())}", try a district or city name (e.g. "Marina Bay" or "Singapore").</div></div>`;
+    return;
+  }
+  const info=weatherInfo(w.code);
+  let tip;
+  if(info.wet)tip="It's wet out ☔ maybe grab the closest spot or order in.";
+  else if(w.temp>=32)tip="Pretty warm 🥵 an iced matcha nearby sounds perfect.";
+  else if(w.temp<=18)tip="A bit cool 🧣 a warm matcha latte would be lovely.";
+  else tip="Lovely weather for a little matcha walk 🚶";
+  // Prefer the resolved building/area name; if the user typed a postal code,
+  // show the friendly name with the code in brackets so it's clear what it mapped to.
+  const from=getFrom();
+  const isPostal=extractPostal(from) && /^\s*s?\d{6}\s*$/i.test(from);
+  const place=w.label ? (isPostal ? `${w.label} (${extractPostal(from)})` : w.label) : from;
+  box.innerHTML=`<div class="wemoji">${info.emoji}</div>
+    <div>
+      <div class="wtemp">${Math.round(w.temp)}°C</div>
+      <div class="wdesc">${info.desc} at ${esc(place)}</div>
+      <div class="wtip">${tip}</div>
+    </div>`;
+}
+
+/* ---- The recommendation matrix ------------------------------------------------*/
+function priceNum(m){var v=parseFloat(String(m.price||"").replace(/[^0-9.]/g,""));return isNaN(v)?null:v;}
+
+/* Entry point for the tab: fill the FROM box, refresh weather, build the cards.  */
+function renderPicks(){
+  const fi=document.getElementById("fromInput");
+  if(fi && !fi.value) fi.value=getFrom();
+  renderWeather();          // async: updates the weather widget
+  buildRecoMatrix();        // synchronous: the mood/budget cards
+  computeConvenient();      // async: fills the "most convenient" card via distance
+}
+
+/* Build every recommendation card except the distance-based one.                 */
+function buildRecoMatrix(){
+  const grid=document.getElementById("recoGrid");
+  if(!grid)return;
+  const rated=data.filter(m=>(m.votes||[]).length>0);   // only rated matchas can be scored
+  const withPrice=data.filter(m=>priceNum(m)!==null);
+
+  // small template: mood label, chosen matcha, a metric pill and a "why" line
+  function card(mood,emoji,pick,why,metric){
+    if(!pick) return `<div class="recocard"><div class="rc-mood">${emoji} ${mood}</div><div class="rc-empty">Not enough data yet, add or rate a matcha! 🌱</div></div>`;
+    return `<div class="recocard"><div class="rc-mood">${emoji} ${mood}</div>
+      <div class="rc-name">${esc(pick.name)}</div>
+      ${metric?`<div class="rc-metric">${metric}</div>`:''}
+      <div class="rc-why">${why}</div></div>`;
+  }
+
+  const byOverall=[...rated].sort((a,b)=>overall(b)-overall(a));
+  const byTaste=[...rated].sort((a,b)=>catAvg(b,"taste")-catAvg(a,"taste"));
+  const byValue=[...rated].sort((a,b)=>catAvg(b,"value")-catAvg(a,"value"));
+  const byVotes=[...rated].sort((a,b)=>(b.votes.length)-(a.votes.length));
+  const cheapest=[...withPrice].sort((a,b)=>priceNum(a)-priceNum(b)||overall(b)-overall(a));
+  const splurge=[...withPrice].sort((a,b)=>priceNum(b)-priceNum(a)||catAvg(b,"quality")-catAvg(a,"quality"));
+
+  const cards=[];
+  cards.push(card("Best overall","🏆",byOverall[0],
+    "Top of the leaderboard with the highest all-round score.",
+    byOverall[0]?`⭐ ${overall(byOverall[0]).toFixed(2)}/5`:""));
+
+  cards.push(card("Feeling cheap","💸",cheapest[0],
+    (cheapest[0]&&byOverall[0]&&cheapest[0].id===byOverall[0].id)?"Easiest on the wallet and still a lovely cup.":"Easiest on the wallet when you want to save a little.",
+    cheapest[0]?`${esc(cheapest[0].price)}`:""));
+
+  cards.push(card("Feeling a splurge","💎",splurge[0],
+    "Treat yourself, the priciest pick for when you want to go all out.",
+    splurge[0]?`${esc(splurge[0].price)}${(splurge[0].votes||[]).length?` · quality ${catAvg(splurge[0],"quality").toFixed(1)}`:""}`:""));
+
+  cards.push(card("Best value","🎯",byValue[0],
+    "Best bang for your buck, based on the team's value ratings.",
+    byValue[0]?`💰 ${catAvg(byValue[0],"value").toFixed(2)}/5`:""));
+
+  cards.push(card("Best taste","🍵",byTaste[0],
+    "Highest taste score for flavour, balance and umami.",
+    byTaste[0]?`🍵 ${catAvg(byTaste[0],"taste").toFixed(2)}/5`:""));
+
+  cards.push(card("Crowd favourite","🔥",byVotes[0],
+    "The most-voted matcha, a safe crowd-pleaser.",
+    byVotes[0]?`🗳️ ${byVotes[0].votes.length} vote${byVotes[0].votes.length===1?"":"s"}`:""));
+
+  // Placeholder for the distance-based card; computeConvenient() fills it in.
+  cards.push(`<div class="recocard" id="recoConvenient"><div class="rc-mood">📍 Most convenient</div><div class="rc-why">Working out what's closest to ${esc(getFrom())}...</div></div>`);
+
+  grid.innerHTML=cards.join("");
+}
+
+/* Fill the "most convenient" card by geocoding every located matcha and finding
+   the one closest to the starting point. Adds a weather-aware nudge.            */
+async function computeConvenient(){
+  const el=document.getElementById("recoConvenient");
+  if(!el)return;
+  const located=data.filter(m=>m.location && m.location.trim());
+  if(!located.length){
+    el.innerHTML=`<div class="rc-mood">📍 Most convenient</div><div class="rc-empty">Add a location to your matchas to unlock this pick! 🗺️</div>`;
+    return;
+  }
+  const from=await geocode(getFrom());
+  if(!from){
+    el.innerHTML=`<div class="rc-mood">📍 Most convenient</div><div class="rc-empty">Couldn't locate "${esc(getFrom())}", try a simpler place name.</div>`;
+    return;
+  }
+  let best=null;
+  for(const m of located){
+    const g=await geocode(m.location);
+    if(!g)continue;
+    const d=haversine(from,g);
+    if(!best||d<best.d)best={m,d};
+  }
+  if(!best){
+    el.innerHTML=`<div class="rc-mood">📍 Most convenient</div><div class="rc-empty">Couldn't map any of the locations yet, try simpler place names.</div>`;
+    return;
+  }
+  const w=await fetchWeather();
+  let wtip="";
+  if(w){const info=weatherInfo(w.code); if(info.wet)wtip=` It's ${info.desc.toLowerCase()} right now, so closer is better ☔.`;}
+  const dist=best.d<1?(Math.round(best.d*1000)+" m"):(best.d.toFixed(1)+" km");
+  el.innerHTML=`<div class="rc-mood">📍 Most convenient</div>
+    <div class="rc-name">${esc(best.m.name)}</div>
+    <div class="rc-metric">~${dist} away</div>
+    <div class="rc-why">Closest to ${esc(getFrom())}.${wtip}</div>`;
 }
 
 /* ============================================================================
@@ -1174,7 +1705,7 @@ async function poll(){
 }
 
 /* migrate(): make sure older saved matchas have all the newer fields.           */
-function migrate(arr){return arr.map(m=>Object.assign({char:"bowl",photo:"",by:"",byKey:"",votes:[],reviews:[]}, m));}
+function migrate(arr){return arr.map(m=>Object.assign({char:"bowl",photo:"",by:"",byKey:"",location:"",votes:[],reviews:[]}, m));}
 
 /* The app entry point — runs once when the page loads.                          */
 async function init(){

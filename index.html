@@ -188,27 +188,6 @@
   .recocard .rc-metric{display:inline-block;background:var(--light);color:var(--green-dark);font-weight:800;font-size:.8rem;padding:2px 9px;border-radius:999px;margin-bottom:6px;}
   .recocard .rc-why{font-size:.86rem;color:#4a6b55;line-height:1.35;}
   .recocard .rc-empty{font-size:.86rem;color:#9bb0a2;font-style:italic;}
-
-  /* ---- Bottom section: "Discover nearby spots" (new places, not yet rated) ---- */
-  .discoverwrap{margin-top:26px;padding-top:22px;border-top:2px dashed var(--mid);}
-  .disc-head h3{font-size:1.25rem;color:var(--green-dark);font-weight:800;}
-  .disc-head .disc-sub{font-size:.88rem;color:#5c7a66;margin:2px 0 12px;}
-  .disc-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px;}
-  .disc-tools label{font-weight:700;color:var(--green-dark);font-size:.9rem;display:flex;align-items:center;gap:6px;}
-  .disc-tools select{padding:8px 10px;border:2px solid var(--mid);border-radius:10px;font:inherit;color:var(--ink);background:#fff;}
-  .disc-results{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:13px;}
-  .disc-card{background:var(--card);border-radius:16px;box-shadow:var(--shadow-sm);border:2px solid #eef4ec;padding:14px 15px;position:relative;transition:.16s;}
-  .disc-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:var(--mid);}
-  .disc-card .dc-name{font-size:1.08rem;font-weight:800;color:var(--green-deep);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
-  .disc-card .dc-tag{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:2px 8px;border-radius:999px;background:var(--light);color:var(--green-dark);}
-  .disc-card .dc-tag.matcha{background:#d6f0dd;color:var(--green-deep);}
-  .disc-card .dc-addr{font-size:.83rem;color:#5c7a66;margin:5px 0 6px;line-height:1.3;}
-  .disc-card .dc-dist{display:inline-block;background:var(--light);color:var(--green-dark);font-weight:800;font-size:.8rem;padding:2px 9px;border-radius:999px;margin-bottom:10px;}
-  .disc-card .dc-add{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#e8f6ec,#d6f0dd);color:var(--green-dark);font-weight:800;font-size:.85rem;border:2px solid var(--lc);border-radius:999px;padding:7px 14px;cursor:pointer;transition:.15s;}
-  .disc-card .dc-add:hover{background:linear-gradient(135deg,#d6f0dd,#c3ebcf);transform:translateY(-1px);}
-  .disc-card .dc-listed{display:inline-flex;align-items:center;gap:5px;font-weight:800;font-size:.82rem;color:var(--lc);}
-  .disc-status{font-size:.9rem;color:#5c7a66;grid-column:1/-1;padding:6px 2px;}
-  .disc-status.bad{color:#c0483b;}
   .try-card .tavatar{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:52px;height:52px;object-fit:contain;filter:drop-shadow(0 3px 4px rgba(21,112,47,.25));}
   .try-card .tname{font-size:1.1rem;font-weight:800;}
   .try-card .tmeta{display:flex;gap:14px;align-items:center;margin-top:8px;flex-wrap:wrap;}
@@ -427,26 +406,6 @@
     <div id="weatherBox" class="weatherbox"></div>
     <!-- The recommendation grid: one card per mood / budget / situation. -->
     <div id="recoGrid" class="recogrid"></div>
-
-    <!-- ---- Bottom section: discover NEW nearby spots (not on the leaderboard) ---- -->
-    <div class="discoverwrap">
-      <div class="disc-head">
-        <h3>🔍 Discover nearby spots</h3>
-        <p class="disc-sub">Matcha &amp; tea places near your starting point that aren't on the leaderboard yet. Add the good ones to your To Try list!</p>
-      </div>
-      <div class="disc-tools">
-        <label>Within
-          <select id="discRadius">
-            <option value="500">500 m</option>
-            <option value="1000" selected>1 km</option>
-            <option value="2000">2 km</option>
-            <option value="5000">5 km</option>
-          </select>
-        </label>
-        <button class="btn" onclick="discoverNearby()">🔎 Search nearby</button>
-      </div>
-      <div id="discResults" class="disc-results"></div>
-    </div>
   </div>
 
   <!-- <footer>
@@ -1783,119 +1742,6 @@ async function computeConvenient(){
     <div class="rc-name">${esc(best.m.name)}</div>
     <div class="rc-metric">~${dist} away</div>
     <div class="rc-why">Closest to ${esc(getFrom())}.${wtip}</div>`;
-}
-
-/* ============================================================================
-   15c) DISCOVER NEARBY — find matcha / tea / cafe spots around the starting point
-        that AREN'T on the leaderboard yet, using the free, no-key Overpass
-        (OpenStreetMap) API. New spots can be added straight to the To Try list;
-        spots already on To Try are flagged.
-        NOTE: OSM has no "sells matcha" tag, so this finds nearby cafes + tea
-        shops and highlights ones whose name suggests matcha/tea.                */
-
-/* Format a readable address from OSM tags. Prefer a postcode (our OneMap
-   geocoder resolves those precisely later), then a street, else just the area. */
-function osmAddress(tags){
-  if(!tags)return "";
-  const pc=tags["addr:postcode"];
-  if(pc)return "Singapore "+pc;                       // postcode → precise later
-  const parts=[];
-  if(tags["addr:housenumber"]&&tags["addr:street"])parts.push(tags["addr:housenumber"]+" "+tags["addr:street"]);
-  else if(tags["addr:street"])parts.push(tags["addr:street"]);
-  if(parts.length)return parts.join(", ")+", Singapore";
-  return "";
-}
-/* Decide what kind of spot this is from its name + tags.                        */
-function classifyPlace(name,tags){
-  const s=(name+" "+JSON.stringify(tags||{})).toLowerCase();
-  if(/matcha|抹茶/.test(s))                       return {kind:"matcha",tag:"🍵 Matcha",prio:0};
-  if(/\btea\b|green tea|\bcha\b|茶| occha|tsujiri|nana's green|ippodo/.test(s)) return {kind:"tea",tag:"🍵 Tea",prio:1};
-  return {kind:"cafe",tag:"☕ Cafe",prio:2};        // cafes probably do a matcha latte
-}
-/* Is this discovered place already known to us? Loose two-way name match so
-   "Ippodo" matches "Ippodo Ceremonial". Returns "rated" | "totry" | null.       */
-function matchExisting(name){
-  const n=normName(name); if(!n)return null;
-  const hit=arr=>arr.some(x=>{const o=normName(x.name||x.store||"");return o&&(o===n||(o.length>=4&&n.length>=4&&(o.includes(n)||n.includes(o))));});
-  if(hit(data))return "rated";
-  if(hit(toTry))return "totry";
-  return null;
-}
-
-/* Query Overpass for cafes / tea shops within `radius` metres of lat/lon.        */
-async function overpassQuery(lat,lon,radius){
-  const q=`[out:json][timeout:25];(`+
-    `node["amenity"="cafe"](around:${radius},${lat},${lon});`+
-    `node["shop"="tea"](around:${radius},${lat},${lon});`+
-    `node["shop"="coffee"](around:${radius},${lat},${lon});`+
-    `node["cuisine"~"tea|matcha|coffee_shop",i](around:${radius},${lat},${lon});`+
-    `way["amenity"="cafe"](around:${radius},${lat},${lon});`+
-    `);out center 80;`;
-  try{
-    const r=await fetch("https://overpass-api.de/api/interpreter",{method:"POST",body:"data="+encodeURIComponent(q)});
-    if(!r.ok)return null;
-    const j=await r.json();
-    return (j&&j.elements)?j.elements:[];
-  }catch(e){return null;}
-}
-
-let _discBusy=false;
-/* Main entry: called by the "Search nearby" button.                             */
-async function discoverNearby(){
-  const box=document.getElementById("discResults");
-  if(!box||_discBusy)return;
-  _discBusy=true;
-  const radius=parseInt(document.getElementById("discRadius").value,10)||1000;
-  box.innerHTML=`<div class="disc-status">⏳ Looking for matcha &amp; tea spots near ${esc(getFrom())}...</div>`;
-  const from=await geocode(getFrom());
-  if(!from){box.innerHTML=`<div class="disc-status bad">Couldn't locate "${esc(getFrom())}", try a postal code or a district / city name.</div>`;_discBusy=false;return;}
-  const els=await overpassQuery(from.lat,from.lon,radius);
-  if(els===null){box.innerHTML=`<div class="disc-status bad">📡 Couldn't reach the map service (your network may be blocking overpass-api.de). Try again, or add spots manually on the To Try tab.</div>`;_discBusy=false;return;}
-
-  // De-duplicate by name, compute distance, classify, and skip already-rated spots.
-  const seen=new Set(); const items=[];
-  for(const e of els){
-    const name=e.tags&&e.tags.name; if(!name)continue;         // skip unnamed places
-    const key=normName(name); if(seen.has(key))continue; seen.add(key);
-    const lat=e.lat!=null?e.lat:(e.center&&e.center.lat), lon=e.lon!=null?e.lon:(e.center&&e.center.lon);
-    if(lat==null||lon==null)continue;
-    const status=matchExisting(name);
-    if(status==="rated")continue;                              // already on the leaderboard, hide it
-    const cls=classifyPlace(name,e.tags);
-    items.push({name,addr:osmAddress(e.tags),dist:haversine(from,{lat,lon}),cls,onTry:status==="totry"});
-  }
-  // Sort: matcha first, then tea, then cafe; nearest within each tier.
-  items.sort((a,b)=>a.cls.prio-b.cls.prio || a.dist-b.dist);
-  _discItems=items.slice(0,15);   // stash so the buttons can reference by index (avoids quote-escaping bugs)
-
-  if(!_discItems.length){box.innerHTML=`<div class="disc-status">No new spots found within ${radius>=1000?(radius/1000)+" km":radius+" m"}. Try a larger radius. 🌱</div>`;_discBusy=false;return;}
-
-  box.innerHTML=_discItems.map((it,i)=>{
-    const dist=it.dist<1?(Math.round(it.dist*1000)+" m"):(it.dist.toFixed(1)+" km");
-    const action=it.onTry
-      ? `<span class="dc-listed">✓ Already on your To Try list</span>`
-      : `<button class="dc-add" onclick="addDiscoveredToTry(${i})">➕ Add to To Try</button>`;
-    return `<div class="disc-card">
-      <div class="dc-name">${esc(it.name)} <span class="dc-tag ${it.cls.kind==="matcha"?"matcha":""}">${it.cls.tag}</span></div>
-      ${it.addr?`<div class="dc-addr">📍 ${esc(it.addr)}</div>`:`<div class="dc-addr">📍 Address not listed on the map</div>`}
-      <div class="dc-dist">~${dist} away</div>
-      <div>${action}</div>
-    </div>`;
-  }).join("");
-  _discBusy=false;
-}
-
-/* Add a discovered spot (by its index in the last results) to the shared To Try
-   list, with de-duplication.                                                    */
-let _discItems=[];
-async function addDiscoveredToTry(idx){
-  const it=_discItems[idx]; if(!it)return;
-  if(!loggedIn()){toast("Log in first to add spots 🙂",true);return;}
-  if(toTry.some(s=>normName(s.store)===normName(it.name))){toast("\""+it.name+"\" is already on the list 🙅");discoverNearby();return;}
-  toTry.push({id:"t"+Date.now(),store:it.name,price:"",notes:"Found via Discover nearby",location:it.addr||"",by:session.u,byKey:session.uKey,ts:Date.now()});
-  saveTry();renderTry();
-  toastMascot(it.name+" added to To Try!",mascotSrc("icecream"));
-  discoverNearby();   // refresh so the card now shows "already on your To Try list"
 }
 
 /* ============================================================================

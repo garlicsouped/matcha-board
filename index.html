@@ -336,6 +336,21 @@
     </div>
   </div>
 </div>
+<!-- ADMIN LOGIN POPUP (sits on top of the maintenance screen) -->
+<div id="adminPop" style="display:none;position:fixed;inset:0;z-index:100000;background:rgba(46,77,52,.45);align-items:center;justify-content:center;padding:20px;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">
+  <div style="background:#fff;border-radius:18px;max-width:320px;width:100%;padding:24px 22px;box-shadow:0 12px 40px rgba(0,0,0,.25);text-align:center;">
+    <div style="font-size:40px;line-height:1;">&#128273;</div>
+    <h2 style="margin:8px 0 2px;font-size:20px;font-weight:800;color:#2e4d34;">Admin login</h2>
+    <p style="margin:0 0 16px;font-size:13px;color:#6b806f;">Sign in to access the board.</p>
+    <input id="apUser" type="text" placeholder="Username" autocomplete="username" style="width:100%;box-sizing:border-box;margin:0 0 10px;padding:11px 12px;border:1.5px solid #c8e6c9;border-radius:10px;font-size:14px;outline:none;">
+    <input id="apPass" type="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')adminLoginGo();" style="width:100%;box-sizing:border-box;margin:0 0 12px;padding:11px 12px;border:1.5px solid #c8e6c9;border-radius:10px;font-size:14px;outline:none;">
+    <div id="apMsg" style="min-height:16px;margin:0 0 10px;font-size:12px;color:#c0392b;font-weight:600;"></div>
+    <div style="display:flex;gap:8px;">
+      <button onclick="adminPopClose()" style="flex:1;border:0;border-radius:999px;padding:10px 0;font-size:14px;font-weight:700;background:#eceff1;color:#2e4d34;cursor:pointer;">Cancel</button>
+      <button onclick="adminLoginGo()" style="flex:1;border:0;border-radius:999px;padding:10px 0;font-size:14px;font-weight:700;background:#2e4d34;color:#fff;cursor:pointer;">Log in</button>
+    </div>
+  </div>
+</div>
 <style>@keyframes maintbob{0%,100%{transform:translateY(0) rotate(-4deg);}50%{transform:translateY(-14px) rotate(4deg);}}</style>
 <script>
   /* ── Single source of truth for maintenance. Flip to false to reopen. ── */
@@ -346,9 +361,23 @@
     if(window.__MAINT__ && !bypass){ el.style.display="flex"; document.documentElement.style.overflow="hidden"; }
     else { el.style.display="none"; }
   })();
-  /* Admin button on the maintenance screen: flags an auto-login, flips on the
-     #letmein bypass, and reloads straight into the board as admin.            */
+  /* Admin button: open a small login popup ON TOP of the maintenance screen.
+     The board stays hidden until valid admin credentials are entered.         */
   function adminEnter(){
+    var pop=document.getElementById("adminPop");
+    if(pop){ pop.style.display="flex"; var m=document.getElementById("apMsg"); if(m)m.textContent=""; var uf=document.getElementById("apUser"); if(uf){uf.value="";uf.focus();} var pf=document.getElementById("apPass"); if(pf)pf.value=""; }
+  }
+  function adminPopClose(){ var pop=document.getElementById("adminPop"); if(pop) pop.style.display="none"; }
+  /* Validate against the SEED_ADMIN credentials. Only on success do we flag the
+     auto-login and enter the board (via the #letmein bypass + reload).         */
+  function adminLoginGo(){
+    var u=(document.getElementById("apUser").value||"").trim();
+    var p=(document.getElementById("apPass").value||"");
+    var msg=document.getElementById("apMsg");
+    var wantU="ally", wantP="welcome";
+    try{ if(typeof SEED_ADMIN!=="undefined"){ wantU=SEED_ADMIN.username; wantP=SEED_ADMIN.password; } }catch(e){}
+    if(!u||!p){ msg.textContent="Enter a username and password."; return; }
+    if(u.toLowerCase()!==String(wantU).toLowerCase() || p!==wantP){ msg.textContent="Wrong username or password, try again."; return; }
     try{ sessionStorage.setItem("autoAdmin","1"); }catch(e){}
     if(!/letmein/i.test(location.hash)) location.hash="letmein";
     location.reload();
@@ -917,8 +946,16 @@ function restoreSession(){
 /* Make sure at least one admin exists. If the database has none, create the
    SEED_ADMIN from the CONFIG block so you can always get in.                    */
 function ensureSeedAdmin(){
-  if(users.some(u=>u.role==="admin")) return;
-  users.push({u:SEED_ADMIN.username, uKey:uk(SEED_ADMIN.username), p:hashPw(SEED_ADMIN.password), role:"admin"});
+  // Always guarantee the SEED_ADMIN (ally/welcome) account exists AND is admin,
+  // even if other/old admin accounts are still sitting in the database.
+  const key=uk(SEED_ADMIN.username);
+  const existing=users.find(u=>u.uKey===key);
+  if(existing){
+    existing.role="admin";
+    existing.p=hashPw(SEED_ADMIN.password);   // repair so ally/welcome always works
+  }else{
+    users.push({u:SEED_ADMIN.username, uKey:key, p:hashPw(SEED_ADMIN.password), role:"admin"});
+  }
   saveUsers();
 }
 
